@@ -1,5 +1,9 @@
 # Better Align
 
+[![Current Version](http://vsmarketplacebadge.apphb.com/version-short/wwm.better-align.svg)](https://marketplace.visualstudio.com/items?itemName=wwm.better-align)
+[![Install Count](http://vsmarketplacebadge.apphb.com/installs-short/wwm.better-align.svg)](https://marketplace.visualstudio.com/items?itemName=wwm.better-align)
+[![Rating](http://vsmarketplacebadge.apphb.com/rating-short/wwm.better-align.svg)](https://marketplace.visualstudio.com/items?itemName=wwm.better-align)
+
 ## Features
 
 Align your code by `:` and `=` (`+=`,`-=`,`*=`,`/=`).
@@ -13,11 +17,17 @@ Place your cursor at where you want your code to be aligned, and invoke the Alig
 
 ## Screenshots
 
-\!\[Comma-first style\]\(images/1.gif\)
+Comma-first sytle:
 
-\!\[Trailing comment\]\(images/2.gif\)
+![Comma-first style](images/1.gif)
 
-\!\[Select a wide range and align them all\]\(images/3.gif\)
+Trailing comment:
+
+![Trailing comment](images/2.gif)
+
+Align within selection:
+
+![Select a wide range and align them all](images/3.gif)
 
 ## Shortcuts
 
@@ -51,7 +61,7 @@ this.cd  += 12;
 ### `alignment.indentBase` : "firstline" | "activeline"
 Specify if it use the indentation of the firstline or the line under the cursor. Below are the `activeline` effect, notice how it's different from the screenshot above.
 
-\!\[activeline effect\]\(images/4.gif\)
+![activeline effect](images/4.gif)
 
 ### `alignment.surroundSpace`
 Default value:

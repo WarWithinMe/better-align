@@ -2,43 +2,63 @@
     "name": "better-align",
     "displayName": "Better Align",
     "description": "Align code without selecting them first.",
-    "version": "1.0.0",
+    "version": "1.0.3",
     "icon": "images/icon.png",
     "repository": "https://github.com/WarWithinMe/better-align",
     "publisher": "wwm",
     "engines": {
         "vscode": "^1.5.0"
     },
-    "categories": [ "Formatters" ],
+    "categories": [
+        "Formatters"
+    ],
     "activationEvents": [
         "onCommand:wwm.aligncode"
     ],
     "main": "./out/src/extension",
     "contributes": {
-        "commands": [{
-            "command": "wwm.aligncode",
-            "title": "Align"
-        }],
+        "commands": [
+            {
+                "command": "wwm.aligncode",
+                "title": "Align"
+            }
+        ],
         "configuration": {
             "type": "object",
             "title": "Alignment configuration",
             "properties": {
                 "alignment.operatorPadding": {
                     "type": "string",
-                    "enum": ["left", "right"],
+                    "enum": [
+                        "left",
+                        "right"
+                    ],
                     "default": "right",
                     "description": "Control where to insert space to align different length operators (e.g. aligning = += *= ...)"
                 },
                 "alignment.surroundSpace": {
                     "type": "object",
-                    "default": { "colon" : [0, 1], "assignment" : [1, 1], "comment" : 2 },
+                    "default": {
+                        "colon": [
+                            0,
+                            1
+                        ],
+                        "assignment": [
+                            1,
+                            1
+                        ],
+                        "comment": 2
+                    },
                     "description": "Specify how many spaces to insert around the operator."
                 },
-                "alignment.indentBase" : {
+                "alignment.indentBase": {
                     "type": "string",
-                    "enum": ["firstline", "activeline"],
-                    "default" : "firstline",
-                    "description" : "Control if we will use the indentation of the active line or the first line of the alignment range."
+                    "enum": [
+                        "firstline",
+                        "activeline"
+                    ],
+                    "default": "firstline",
+                    "description": "Control if we will use the indentation of the active line or the first line of the alignment range."
                 }
             }
         }
