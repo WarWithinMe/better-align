@@ -471,7 +471,7 @@ export default class Formatter {
 
         let op = info.tokens[i].text;
         if ( op.length < operatorSize ) {
-          if ( configOP == "left" ) {
+          if ( configOP == "right" ) {
             op = whitespace( operatorSize - op.length ) + op;
           } else {
             op = op + whitespace( operatorSize - op.length );

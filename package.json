@@ -3,6 +3,8 @@
     "displayName": "Better Align",
     "description": "Align code without selecting them first.",
     "version": "1.0.0",
+    "icon": "images/icon.png",
+    "repository": "https://github.com/WarWithinMe/better-align",
     "publisher": "wwm",
     "engines": {
         "vscode": "^1.5.0"
@@ -24,7 +26,7 @@
                 "alignment.operatorPadding": {
                     "type": "string",
                     "enum": ["left", "right"],
-                    "default": "left",
+                    "default": "right",
                     "description": "Control where to insert space to align different length operators (e.g. aligning = += *= ...)"
                 },
                 "alignment.surroundSpace": {

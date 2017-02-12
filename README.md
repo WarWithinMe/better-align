@@ -1,65 +1,105 @@
-# better-align README
-
-This is the README for your extension "better-align". After writing up a brief description, we recommend including the following sections.
+# Better Align
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+Align your code by `:` and `=` (`+=`,`-=`,`*=`,`/=`).
+It has additional support for comma-first coding style and trailing comment.
 
-For example if there is an image subfolder under your extension project workspace:
+And it doesn't require you to select what to be aligned, the extension will figure it out by itself.
 
-\!\[feature X\]\(images/feature-x.png\)
+## How to use
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+Place your cursor at where you want your code to be aligned, and invoke the Align command via Command Palette or customized shortcut. Then the code will be automatically aligned.
 
-## Requirements
+## Screenshots
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+\!\[Comma-first style\]\(images/1.gif\)
+
+\!\[Trailing comment\]\(images/2.gif\)
+
+\!\[Select a wide range and align them all\]\(images/3.gif\)
+
+## Shortcuts
+
+There's no built-in shortcut comes with the extension, you have to add shotcuts by yourself:
+1. Open Command Palette and type `open shortcuts` to open keybinding settings
+2. Add something similar like this:
+```
+{ "key": "ctrl+cmd+=",  "command": "wwm.aligncode",
+                           "when": "editorTextFocus && !editorReadonly" }
+```
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+### `alignment.operatorPadding` : "left" | "right"
 
-For example:
+Specify how assignment operator will be aligned.
+```
+// Original code
+this.abc=10;
+this.cd+=12;
+
+// left
+this.abc =  10;
+this.cd  += 12;
+
+// right
+this.abc  = 10;
+this.cd  += 12;
+```
+
+### `alignment.indentBase` : "firstline" | "activeline"
+Specify if it use the indentation of the firstline or the line under the cursor. Below are the `activeline` effect, notice how it's different from the screenshot above.
+
+\!\[activeline effect\]\(images/4.gif\)
+
+### `alignment.surroundSpace`
+Default value:
+```
+alignment.surroundSpace : {
+  "colon"      : [0, 1], // The first number specify how much space to add to the left, this number can also be negative.
+                         // The second number is how much space to the right, this number cannot be negative.
+  "assignment" : [1, 1], // The same as above.
+  "comment"    : 2       // Special how much space to add between the trailing comment and the code.
+}
+```
+
+```
+// Orignal code
+var abc = {
+  hello:      1
+  ,my :2//comment
+  ,friend:   3      // comment
+}
+
+// "colon": [0, 1]
+// "comment": 2
+var abc = {
+    hello : 1
+  , my    : 2  // comment
+  , friend: 3  // comment
+}
+
+// "colon": [-1, 3]
+// "comment": 2
+var abc = {
+    hello:    1
+  , my:       2  // comment
+  , friend:   3  // comment
+}
+
+// "colon": [1, 2]
+// "comment": 4
+var abc = {
+    hello  :  1
+  , my     :  2    // comment
+  , friend :  3    // comment
+}
+
+```
+
 
 This extension contributes the following settings:
 
 * `myExtension.enable`: enable/disable this extension
 * `myExtension.thing`: set to `blah` to do something
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on OSX or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on OSX or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (OSX) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
