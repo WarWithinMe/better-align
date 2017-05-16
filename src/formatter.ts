@@ -3,10 +3,11 @@ import * as vscode from "vscode";
 enum TokenType {
     Invalid
   , Word
-  , Assignment
-  , Block
-  , PartialBlock
-  , EndOfBlock
+  , Assignment      // = += -= *= /=
+  , Arrow           // -> =>
+  , Block           // {} [] ()
+  , PartialBlock    // { [ (
+  , EndOfBlock      // } ] )
   , String
   , PartialString
   , Comment
@@ -125,6 +126,7 @@ export default class Formatter {
       let next = text.charAt(pos+1);
 
       let currTokenType:TokenType;
+      let tokenSize = 1;
 
       if ( char.match( REG_WS ) ) {
         currTokenType = TokenType.Whitespace;
@@ -136,6 +138,7 @@ export default class Formatter {
         currTokenType = TokenType.EndOfBlock;
       } else if ( char == "/" && (next == "*" || next == "/") ) {
         currTokenType = TokenType.Comment;
+        tokenSize = 2;
       } else if ( char == ":" && next != ":" ) {
         currTokenType = TokenType.Colon;
       } else if ( char == "," ) {
@@ -144,10 +147,14 @@ export default class Formatter {
         } else {
           currTokenType = TokenType.Comma;
         }
+      } else if ( (char == "-" || char == "=") && next == ">" ) {
+        currTokenType = TokenType.Arrow;
+        tokenSize = 2;
       } else if ( char == "=" && next != "=" ) {
         currTokenType = TokenType.Assignment;
       } else if (( char == "+" || char == "-" || char == "*" || char == "/" ) && next == "=" ) {
         currTokenType = TokenType.Assignment;
+        tokenSize = 2;
       } else {
         currTokenType = TokenType.Word;
       }
@@ -164,7 +171,10 @@ export default class Formatter {
         tokenStartPos = pos;
 
         if ( lt.sgfntTokenType == TokenType.Invalid ) {
-          if ( lastTokenType == TokenType.Assignment || lastTokenType == TokenType.Colon ) {
+          if ( lastTokenType == TokenType.Assignment
+            || lastTokenType == TokenType.Colon
+            || lastTokenType == TokenType.Arrow
+          ) {
             lt.sgfntTokenType = lastTokenType;
           }
         }
@@ -224,7 +234,7 @@ export default class Formatter {
         }
       }
 
-      ++pos;
+      pos += tokenSize;
     }
 
     if ( tokenStartPos != -1 ) {
@@ -394,7 +404,7 @@ export default class Formatter {
     const configOP  = config.get("operatorPadding") as string;
     const configWS  = config.get("surroundSpace");
     const stt       = TokenType[range.infos[0].sgfntTokenType].toLowerCase();
-    const configDef = { "colon": [0, 1], "assignment": [1, 1], "comment": 2 };
+    const configDef = { "colon": [0, 1], "assignment": [1, 1], "comment": 2, "arrow" : [1, 1] };
     const configSTT = configWS[stt] || configDef[stt];
     const configComment = configWS["comment"] || configDef["comment"];
 

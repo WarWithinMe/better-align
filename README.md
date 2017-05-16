@@ -6,7 +6,7 @@
 
 ## Features
 
-Align your code by `:` and `=` (`+=`,`-=`,`*=`,`/=`).
+Align your code by colon(`:`), assignment(`=`,`+=`,`-=`,`*=`,`/=`) and arrow(`=>`, `->`).
 It has additional support for comma-first coding style and trailing comment.
 
 And it doesn't require you to select what to be aligned, the extension will figure it out by itself.
@@ -70,6 +70,7 @@ alignment.surroundSpace : {
   "colon"      : [0, 1], // The first number specify how much space to add to the left, this number can also be negative.
                          // The second number is how much space to the right, this number cannot be negative.
   "assignment" : [1, 1], // The same as above.
+  "arrow"      : [1, 1], // The same as above.
   "comment"    : 2       // Special how much space to add between the trailing comment and the code.
 }
 ```
@@ -105,5 +106,18 @@ var abc = {
   , my     :  2    // comment
   , friend :  3    // comment
 }
+
+
+// Orignal code
+$data = array(
+    'text' => 'something',
+    'here is another' => 'sample'
+);
+
+// "arrow": [1, 3]
+$data = array(
+    'text'            =>   'something',
+    'here is another' =>   'sample'
+);
 
 ```
