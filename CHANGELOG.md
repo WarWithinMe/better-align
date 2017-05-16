@@ -1,7 +1,5 @@
-# Change Log
-All notable changes to the "better-align" extension will be documented in this file.
+1.1.1
+=====
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
-## [Unreleased]
-- Initial release
+## What's New
+- Arrows (-> =>) can be aligned
