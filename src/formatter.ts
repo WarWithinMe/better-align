@@ -4,7 +4,7 @@ enum TokenType {
     Invalid
   , Word
   , Assignment      // = += -= *= /=
-  , Arrow           // -> =>
+  , Arrow           // =>
   , Block           // {} [] ()
   , PartialBlock    // { [ (
   , EndOfBlock      // } ] )
@@ -147,7 +147,7 @@ export default class Formatter {
         } else {
           currTokenType = TokenType.Comma;
         }
-      } else if ( (char == "-" || char == "=") && next == ">" ) {
+      } else if ( char == "=" && next == ">" ) {
         currTokenType = TokenType.Arrow;
         tokenSize = 2;
       } else if ( char == "=" && next != "=" ) {
