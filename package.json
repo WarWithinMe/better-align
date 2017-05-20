@@ -59,10 +59,11 @@
                     "type": "string",
                     "enum": [
                         "firstline",
-                        "activeline"
+                        "activeline",
+                        "dontchange"
                     ],
                     "default": "firstline",
-                    "description": "Control if we will use the indentation of the active line or the first line of the alignment range."
+                    "description": "firstline: Change indent of all lines to the firstline.\n activeline: Change intent of all lines to the activeline.\n dontchange: Don't change line indent, only aligns those lines with same indentation."
                 }
             }
         }

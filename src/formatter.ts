@@ -24,9 +24,9 @@ interface Token {
 }
 
 interface LineInfo {
-  line   : vscode.TextLine;
+  line           : vscode.TextLine;
   sgfntTokenType : TokenType;
-  tokens : Token[];
+  tokens         : Token[];
 }
 
 interface LineRange {
@@ -59,47 +59,67 @@ export default class Formatter {
     var ranges : LineRange[] = [];
 
     editor.selections.forEach( (sel)=> {
+
+      const config = vscode.workspace.getConfiguration("alignment");
+      const indentBase:string       = config.get("indentBase", "firstline");
+      const importantIndent:boolean = indentBase == "dontchange";
+
       let res:LineRange;
       if ( sel.isSingleLine ) {
         // If this selection is single line. Look up and down to search for the similar neighbour
-        ranges.push( this.narrow(0, editor.document.lineCount-1, sel.active.line) );
+        ranges.push( this.narrow(0, editor.document.lineCount-1, sel.active.line, importantIndent) );
       } else {
         // Otherwise, narrow down the range where to align
         let start = sel.start.line;
         let end   = sel.end.line;
 
         while ( true ) {
-          res = this.narrow(start, end, start);
+          res = this.narrow(start, end, start, importantIndent);
           let lastLine = res.infos[res.infos.length - 1];
-          if ( lastLine.line.lineNumber >= end ) {
+
+          if ( lastLine.line.lineNumber > end ) {
             break;
           }
-          start = lastLine.line.lineNumber + 1;
+
           if ( res.infos[0] && res.infos[0].sgfntTokenType != TokenType.Invalid ) {
             ranges.push( res );
           }
+
+          if ( lastLine.line.lineNumber == end ) {
+            break;
+          }
+
+          start = lastLine.line.lineNumber + 1;
         }
       }
     });
 
-    for ( let range of ranges ) {
-      console.log( `===== : ${range.anchor}`);
-      for ( let info of range.infos ) {
-        console.log( info.line, TokenType[ info.sgfntTokenType ], info.tokens );
-      }
-    }
-
     // Format
     let formatted:string[][] = [];
     for ( let range of ranges ) {
+
+      /*
+      console.log( `\n===============` );
+      for ( let info of range.infos ) {
+        console.log( `+++ [${info.line.lineNumber}]: ${TokenType[info.sgfntTokenType]} +++` );
+        console.log( info.line, info.tokens );
+      }
+      // */
+
       formatted.push( this.format( range ) );
     }
 
     // Apply
     editor.edit(( editBuilder )=>{
       for ( let i = 0; i < ranges.length; ++i ) {
-        var infos = ranges[i].infos;
-        var location = new vscode.Range( infos[0].line.lineNumber, 0, infos[infos.length-1].line.lineNumber, infos[infos.length-1].line.text.length);
+
+        var infos    = ranges[i].infos;
+        var lastline = infos[infos.length-1].line;
+        var location = new vscode.Range( infos[0].line.lineNumber,
+                                         0,
+                                         lastline.lineNumber,
+                                         lastline.text.length );
+
         editBuilder.replace(location, formatted[i].join("\n"));
       }
     });
@@ -112,9 +132,9 @@ export default class Formatter {
     let text = textline.text;
     let pos  = 0;
     let lt:LineInfo = {
-      line:textline
-      , sgfntTokenType:TokenType.Invalid
-      , tokens:[]
+        line           : textline
+      , sgfntTokenType : TokenType.Invalid
+      , tokens         : []
     };
 
     let lastTokenType = TokenType.Invalid;
@@ -126,8 +146,8 @@ export default class Formatter {
       let next = text.charAt(pos+1);
 
       let currTokenType:TokenType;
-      let tokenSize = 1;
 
+      // Tokens order are important
       if ( char.match( REG_WS ) ) {
         currTokenType = TokenType.Whitespace;
       } else if ( char == "\"" || char == "'" || char == "`" ) {
@@ -138,23 +158,23 @@ export default class Formatter {
         currTokenType = TokenType.EndOfBlock;
       } else if ( char == "/" && (next == "*" || next == "/") ) {
         currTokenType = TokenType.Comment;
-        tokenSize = 2;
+        ++pos;
       } else if ( char == ":" && next != ":" ) {
         currTokenType = TokenType.Colon;
       } else if ( char == "," ) {
         if ( lt.tokens.length == 0 || (lt.tokens.length == 1 && lt.tokens[0].type == TokenType.Whitespace) ) {
-          currTokenType = TokenType.CommaAsWord;
+          currTokenType = TokenType.CommaAsWord; // Comma-first style
         } else {
           currTokenType = TokenType.Comma;
         }
       } else if ( char == "=" && next == ">" ) {
         currTokenType = TokenType.Arrow;
-        tokenSize = 2;
+        ++pos;
       } else if ( char == "=" && next != "=" ) {
         currTokenType = TokenType.Assignment;
       } else if (( char == "+" || char == "-" || char == "*" || char == "/" ) && next == "=" ) {
         currTokenType = TokenType.Assignment;
-        tokenSize = 2;
+        ++pos;
       } else {
         currTokenType = TokenType.Word;
       }
@@ -173,8 +193,8 @@ export default class Formatter {
         if ( lt.sgfntTokenType == TokenType.Invalid ) {
           if ( lastTokenType == TokenType.Assignment
             || lastTokenType == TokenType.Colon
-            || lastTokenType == TokenType.Arrow
-          ) {
+            || lastTokenType == TokenType.Arrow )
+          {
             lt.sgfntTokenType = lastTokenType;
           }
         }
@@ -185,7 +205,6 @@ export default class Formatter {
         ++pos;
         while ( pos < text.length ) {
           let quote = text.charAt(pos);
-          console.log( quote );
           if ( quote == char && text.charAt(pos-1) != "\\" ) {
             break;
           }
@@ -234,7 +253,7 @@ export default class Formatter {
         }
       }
 
-      pos += tokenSize;
+      ++pos;
     }
 
     if ( tokenStartPos != -1 ) {
@@ -247,6 +266,35 @@ export default class Formatter {
     return lt;
   }
 
+  protected hasPartialToken( info:LineInfo ):boolean {
+    for ( let j = info.tokens.length-1; j >= 0; --j ) {
+      let lastT = info.tokens[ j ];
+      if ( lastT.type == TokenType.PartialBlock
+        || lastT.type == TokenType.EndOfBlock
+        || lastT.type == TokenType.PartialString )
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  protected hasSameIndent( info1:LineInfo, info2:LineInfo ):boolean {
+
+    var t1 = info1.tokens[0];
+    var t2 = info2.tokens[0];
+
+    if ( t1.type == TokenType.Whitespace ) {
+      if ( t1.text == t2.text ) {
+        return true;
+      }
+    } else if ( t2.type != TokenType.Whitespace ) {
+      return true;
+    }
+
+    return false;
+  }
+
   /*
     * Determine which blocks of code needs to be align.
     * 1. Empty lines is the boundary of a block.
@@ -255,7 +303,7 @@ export default class Formatter {
     * 3. Bracket / Brace usually means boundary.
     * 4. Unsimilar line is boundary.
     */
-  protected narrow( start:number, end:number, anchor:number ):LineRange {
+  protected narrow( start:number, end:number, anchor:number, importantIndent:boolean ):LineRange {
     let anchorToken = this.tokenize( anchor );
     let range = { anchor, infos:[ anchorToken ] };
 
@@ -263,14 +311,19 @@ export default class Formatter {
       return range;
     }
 
+    if ( this.hasPartialToken(anchorToken) ) {
+      return range;
+    }
+
     let i = anchor - 1;
     while ( i >= start ) {
       let token = this.tokenize( i );
-      let lastT = token.tokens[ token.tokens.length - 1 ]
 
-      if ( token.sgfntTokenType != anchorToken.sgfntTokenType ) {
+      if ( token.sgfntTokenType != anchorToken.sgfntTokenType || this.hasPartialToken(token) ) {
         break;
-      } else if ( lastT.type == TokenType.PartialBlock || lastT.type == TokenType.PartialString ) {
+      }
+
+      if ( importantIndent && !this.hasSameIndent(anchorToken, token) ) {
         break;
       }
 
@@ -281,11 +334,16 @@ export default class Formatter {
     i = anchor + 1;
     while ( i <= end ) {
       let token = this.tokenize(i);
-      let lastT = token.tokens[token.tokens.length - 1]
 
       if (token.sgfntTokenType != anchorToken.sgfntTokenType) {
         break;
-      } else if (lastT.type == TokenType.EndOfBlock ) {
+      }
+
+      if ( importantIndent && !this.hasSameIndent(anchorToken, token) ) {
+        break;
+      }
+
+      if ( this.hasPartialToken(token) ) {
         range.infos.push( token );
         break;
       }

@@ -58,8 +58,10 @@ this.abc  = 10;
 this.cd  += 12;
 ```
 
-### `alignment.indentBase` : "firstline" | "activeline"
+### `alignment.indentBase` : "firstline" | "activeline" | "dontchange"
 Specify if it use the indentation of the firstline or the line under the cursor. Below are the `activeline` effect, notice how it's different from the screenshot above.
+
+If `indentBase` is `dontchange`, better-align will only align lines with same indentation and will not modify the indentation.
 
 ![activeline effect](images/4.gif)
 
