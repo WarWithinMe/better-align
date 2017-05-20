@@ -69,8 +69,8 @@ If `indentBase` is `dontchange`, better-align will only align lines with same in
 Default value:
 ```
 alignment.surroundSpace : {
-  "colon"      : [0, 1], // The first number specify how much space to add to the left, this number can also be negative.
-                         // The second number is how much space to the right, this number cannot be negative.
+  "colon"      : [0, 1], // The first number specify how much space to add to the left, can be negative.
+                         // The second number is how much space to the right, can be negative.
   "assignment" : [1, 1], // The same as above.
   "arrow"      : [1, 1], // The same as above.
   "comment"    : 2       // Special how much space to add between the trailing comment and the code.
@@ -93,6 +93,14 @@ var abc = {
   , friend: 3  // comment
 }
 
+// "colon": [1, 2]
+// "comment": 4
+var abc = {
+    hello  :  1
+  , my     :  2    // comment
+  , friend :  3    // comment
+}
+
 // "colon": [-1, 3]
 // "comment": 2
 var abc = {
@@ -101,12 +109,12 @@ var abc = {
   , friend:   3  // comment
 }
 
-// "colon": [1, 2]
-// "comment": 4
+// "colon": [-1, -1]
+// "comment": 2
 var abc = {
-    hello  :  1
-  , my     :  2    // comment
-  , friend :  3    // comment
+     hello:1
+  ,     my:2  //comment
+  , friend:3  // comment
 }
 
 

@@ -2,7 +2,7 @@
     "name": "better-align",
     "displayName": "Better Align",
     "description": "Align code without selecting them first.",
-    "version": "1.1.2",
+    "version": "1.1.3",
     "icon": "images/icon.png",
     "repository": "https://github.com/WarWithinMe/better-align",
     "publisher": "wwm",
@@ -64,6 +64,16 @@
                     ],
                     "default": "firstline",
                     "description": "firstline: Change indent of all lines to the firstline.\n activeline: Change intent of all lines to the activeline.\n dontchange: Don't change line indent, only aligns those lines with same indentation."
+                }
+            }
+        },
+        "configurationDefaults": {
+            "[shellscript]": {
+                "alignment.surroundSpace": {
+                    "colon": [ 0, 1 ],
+                    "assignment": [ -1, -1 ],
+                    "arrow":[ 1, 1 ],
+                    "comment": 2
                 }
             }
         }

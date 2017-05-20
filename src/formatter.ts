@@ -60,8 +60,7 @@ export default class Formatter {
 
     editor.selections.forEach( (sel)=> {
 
-      const config = vscode.workspace.getConfiguration("alignment");
-      const indentBase:string       = config.get("indentBase", "firstline");
+      const indentBase = this.getConfig().get("indentBase", "firstline") as string;
       const importantIndent:boolean = indentBase == "dontchange";
 
       let res:LineRange;
@@ -127,6 +126,29 @@ export default class Formatter {
 
   protected editor:vscode.TextEditor;
 
+  protected getConfig() {
+
+    let defaultConfig = vscode.workspace.getConfiguration("alignment");
+    let langConfig:Object = null;
+
+    try {
+      langConfig = vscode.workspace.getConfiguration().get(`[${this.editor.document.languageId}]`) as any;
+    } catch (e) {}
+
+    return {
+      get : function( key:any, defaultValue?:any ):any {
+        if ( langConfig ) {
+          key = "alignment." + key;
+          if ( langConfig.hasOwnProperty(key) ) {
+            return langConfig[key];
+          }
+        }
+
+        return defaultConfig.get( key, defaultValue );
+      }
+    };
+  }
+
   protected tokenize( line:number ):LineInfo {
     let textline = this.editor.document.lineAt( line );
     let text = textline.text;
@@ -158,7 +180,6 @@ export default class Formatter {
         currTokenType = TokenType.EndOfBlock;
       } else if ( char == "/" && (next == "*" || next == "/") ) {
         currTokenType = TokenType.Comment;
-        ++pos;
       } else if ( char == ":" && next != ":" ) {
         currTokenType = TokenType.Colon;
       } else if ( char == "," ) {
@@ -197,6 +218,9 @@ export default class Formatter {
           {
             lt.sgfntTokenType = lastTokenType;
           }
+        } else if ( lastTokenType == TokenType.Assignment ) {
+          // Assignment is always the significant token.
+          lt.sgfntTokenType = TokenType.Assignment;
         }
       }
 
@@ -246,6 +270,7 @@ export default class Formatter {
           while ( pos < text.length ) {
             if ( text.charAt(pos) == "*" && text.charAt(pos+1) == "/" ) {
               ++pos;
+              currTokenType = TokenType.Word;
               break;
             }
             ++pos;
@@ -358,12 +383,11 @@ export default class Formatter {
   protected format( range:LineRange ):string[] {
 
     // 0. Remove indentatioin, and trailing whitespace
-    let indentation = null;
-    let anchorLine  = range.infos[0];
+    let   indentation = null;
+    let   anchorLine  = range.infos[0];
+    const config      = this.getConfig();
 
-    const config    = vscode.workspace.getConfiguration("alignment");
-
-    if (config.get("indentBase", "firstline") != "firstline") {
+    if (config.get("indentBase", "firstline") as string == "activeline") {
       for ( let info of range.infos ) {
         if ( info.line.lineNumber == range.anchor ) {
           anchorLine = info;
@@ -559,10 +583,25 @@ export default class Formatter {
         } else {
           if (configSTT[0] < 0) {
             // operator will stick with the leftside word
-            res = res + op;
-            if ( i < info.tokens.length - 1 ) {
-              res += padding;
+            if ( configSTT[1] < 0 ) {
+              // operator will be aligned, and the sibling token will be connected with the operator
+              let z = res.length - 1;
+              while ( z >= 0 ) {
+                let ch = res.charAt( z );
+                if ( ch.match(REG_WS) ) {
+                  break;
+                }
+                --z;
+              }
+              res = res.substring(0, z+1) + padding + res.substring(z+1) + op;
+
+            } else {
+              res = res + op;
+              if ( i < info.tokens.length - 1 ) {
+                res += padding;
+              }
             }
+
           } else {
             res = res + padding + whitespace(configSTT[0]) + op;
           }
