@@ -74,6 +74,7 @@ alignment.surroundSpace : {
   "assignment" : [1, 1], // The same as above.
   "arrow"      : [1, 1], // The same as above.
   "comment"    : 2       // Special how much space to add between the trailing comment and the code.
+                         // If this value is negative, it means don't align the trailing comment.
 }
 ```
 

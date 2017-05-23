@@ -1,3 +1,11 @@
+1.1.4
+=====
+
+## Bug
+- Fix #5, `+=` was changed to `=`
+- Fix #4, double slash after colon is being recognized as comment. e.g. `http://`
+
+
 1.1.3
 =====
 
