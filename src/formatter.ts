@@ -169,6 +169,8 @@ export default class Formatter {
 
       let currTokenType:TokenType;
 
+      let nextSeek = 1;
+
       // Tokens order are important
       if ( char.match( REG_WS ) ) {
         currTokenType = TokenType.Whitespace;
@@ -190,12 +192,12 @@ export default class Formatter {
         }
       } else if ( char == "=" && next == ">" ) {
         currTokenType = TokenType.Arrow;
-        ++pos;
+        nextSeek = 2;
       } else if ( char == "=" && next != "=" ) {
         currTokenType = TokenType.Assignment;
       } else if (( char == "+" || char == "-" || char == "*" || char == "/" ) && next == "=" ) {
         currTokenType = TokenType.Assignment;
-        ++pos;
+        nextSeek = 2;
       } else {
         currTokenType = TokenType.Word;
       }
@@ -278,7 +280,7 @@ export default class Formatter {
         }
       }
 
-      ++pos;
+      pos += nextSeek;
     }
 
     if ( tokenStartPos != -1 ) {
