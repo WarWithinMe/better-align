@@ -138,9 +138,9 @@ export default class Formatter {
     return {
       get : function( key:any, defaultValue?:any ):any {
         if ( langConfig ) {
-          key = "alignment." + key;
-          if ( langConfig.hasOwnProperty(key) ) {
-            return langConfig[key];
+          var key1 = "alignment." + key;
+          if ( langConfig.hasOwnProperty(key1) ) {
+            return langConfig[key1];
           }
         }
 

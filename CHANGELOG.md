@@ -1,3 +1,10 @@
+1.1.5
+=====
+
+## Bug
+- Fix plugin not working when language config is present in user settings, but it doesn't include better-align settings.
+
+
 1.1.4
 =====
 
