@@ -1,3 +1,7 @@
+1.1.6
+=====
+- Enhance the logic of finding which op to be aligned.
+
 1.1.5
 =====
 

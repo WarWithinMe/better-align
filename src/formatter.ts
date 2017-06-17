@@ -26,6 +26,7 @@ interface Token {
 interface LineInfo {
   line           : vscode.TextLine;
   sgfntTokenType : TokenType;
+  sgfntTokens    : TokenType[];
   tokens         : Token[];
 }
 
@@ -156,6 +157,7 @@ export default class Formatter {
     let lt:LineInfo = {
         line           : textline
       , sgfntTokenType : TokenType.Invalid
+      , sgfntTokens    : []
       , tokens         : []
     };
 
@@ -216,16 +218,13 @@ export default class Formatter {
         lastTokenType = currTokenType;
         tokenStartPos = pos;
 
-        if ( lt.sgfntTokenType == TokenType.Invalid ) {
-          if ( lastTokenType == TokenType.Assignment
-            || lastTokenType == TokenType.Colon
-            || lastTokenType == TokenType.Arrow )
-          {
-            lt.sgfntTokenType = lastTokenType;
+        if ( lastTokenType == TokenType.Assignment
+          || lastTokenType == TokenType.Colon
+          || lastTokenType == TokenType.Arrow )
+        {
+          if ( lt.sgfntTokens.indexOf(lastTokenType) === -1 ) {
+            lt.sgfntTokens.push( lastTokenType );
           }
-        } else if ( lastTokenType == TokenType.Assignment ) {
-          // Assignment is always the significant token.
-          lt.sgfntTokenType = TokenType.Assignment;
         }
       }
 
@@ -325,6 +324,20 @@ export default class Formatter {
     return false;
   }
 
+  protected arrayAnd( array1:TokenType[], array2:TokenType[] ):TokenType[] {
+    var res:TokenType[] = []
+    var map = {}
+    for ( var i = 0; i < array1.length; ++i ) {
+      map[array1[i]] = true;
+    }
+    for ( var i = 0; i < array2.length; ++i ) {
+      if ( map[array2[i]] ) {
+        res.push( array2[i] );
+      }
+    }
+    return res;
+  }
+
   /*
     * Determine which blocks of code needs to be align.
     * 1. Empty lines is the boundary of a block.
@@ -337,7 +350,9 @@ export default class Formatter {
     let anchorToken = this.tokenize( anchor );
     let range = { anchor, infos:[ anchorToken ] };
 
-    if ( anchorToken.sgfntTokenType == TokenType.Invalid ) {
+    let tokenTypes = anchorToken.sgfntTokens;
+
+    if ( anchorToken.sgfntTokens.length == 0 ) {
       return range;
     }
 
@@ -349,9 +364,15 @@ export default class Formatter {
     while ( i >= start ) {
       let token = this.tokenize( i );
 
-      if ( token.sgfntTokenType != anchorToken.sgfntTokenType || this.hasPartialToken(token) ) {
+      if ( this.hasPartialToken(token) ) {
         break;
       }
+
+      let tt = this.arrayAnd( tokenTypes, token.sgfntTokens );
+      if ( tt.length == 0 ) {
+        break;
+      }
+      tokenTypes = tt;
 
       if ( importantIndent && !this.hasSameIndent(anchorToken, token) ) {
         break;
@@ -365,9 +386,11 @@ export default class Formatter {
     while ( i <= end ) {
       let token = this.tokenize(i);
 
-      if (token.sgfntTokenType != anchorToken.sgfntTokenType) {
+      let tt = this.arrayAnd( tokenTypes, token.sgfntTokens );
+      if ( tt.length == 0 ) {
         break;
       }
+      tokenTypes = tt;
 
       if ( importantIndent && !this.hasSameIndent(anchorToken, token) ) {
         break;
@@ -380,6 +403,16 @@ export default class Formatter {
 
       range.infos.push( token );
       ++i;
+    }
+
+    let sgt;
+    if ( tokenTypes.indexOf(TokenType.Assignment) >= 0 ) {
+      sgt = TokenType.Assignment;
+    } else {
+      sgt = tokenTypes[0];
+    }
+    for ( let info of range.infos ) {
+      info.sgfntTokenType = sgt;
     }
 
     return range;
