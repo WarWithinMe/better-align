@@ -1,3 +1,7 @@
+1.1.7
+=====
+- Fix #8, '==' is interpreted as two '='.
+
 1.1.6
 =====
 - Enhance the logic of finding which op to be aligned.
