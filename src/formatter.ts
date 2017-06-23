@@ -198,11 +198,14 @@ export default class Formatter {
       } else if ( char == "=" && next == ">" ) {
         currTokenType = TokenType.Arrow;
         nextSeek = 2;
-      } else if ( char == "=" && next != "=" ) {
-        currTokenType = TokenType.Assignment;
+      } else if ( char == "=" && next == "=" ) {
+        currTokenType = TokenType.Word;
+        nextSeek = 2;
       } else if (( char == "+" || char == "-" || char == "*" || char == "/" ) && next == "=" ) {
         currTokenType = TokenType.Assignment;
         nextSeek = 2;
+      } else if ( char == "=" && next != "=" ) {
+        currTokenType = TokenType.Assignment;
       } else {
         currTokenType = TokenType.Word;
       }
